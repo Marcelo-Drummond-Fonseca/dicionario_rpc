@@ -32,7 +32,10 @@ class Dicionario:
         dicionario = json.load(open("dicionario.txt"))
         if chave in dicionario:
             del dicionario[chave]
-        json.dump(dicionario, open("dicionario.txt",'w'))
+            json.dump(dicionario, open("dicionario.txt",'w'))
+            return 1
+        else:
+            return 0
 
     def removerElementoDicionario(self, chave, texto):
         '''Carrega o dicionario e remove o valor desejado na lista da chave'''
@@ -40,7 +43,9 @@ class Dicionario:
         if chave in dicionario:
             if texto in dicionario[chave]:
                 dicionario[chave].remove(texto)
-        json.dump(dicionario, open("dicionario.txt",'w'))
+                json.dump(dicionario, open("dicionario.txt",'w'))
+                return 1
+        return 0
 
 # classe que implementa o servico de dicionario
 class Servidor(rpyc.Service):
@@ -69,14 +74,20 @@ class Servidor(rpyc.Service):
 	# imprime a chave recebida e remove a chave
 	def exposed_Remover_Chave(self, chave):
 		print("Requisição de remoçao de chave " + chave)
-		self.dicionario.removerChaveDicionario(chave)
-		return chave + " e todos os valores associados foram removidos"
+		ret = self.dicionario.removerChaveDicionario(chave)
+		if ret == 1:
+			return chave + " e todos os valores associados foram removidos"
+		else:
+			return "Chave não encontrada"
 
 	# imprime a chave e valor recebidos e remove o valor da chave
 	def exposed_Remover_Valor(self, chave, valor):
 		print("Requisição de remoçao do valor " + valor + " da chave " + chave)
-		self.dicionario.removerElementoDicionario(chave, valor)
-		return valor + " foi removido da chave " + chave
+		ret = self.dicionario.removerElementoDicionario(chave, valor)
+		if ret == 1:
+			return valor + " foi removido da chave " + chave
+		else:
+			return "Par chave/elemento não encontrado"
 
 # dispara o servidor
 if __name__ == "__main__":
